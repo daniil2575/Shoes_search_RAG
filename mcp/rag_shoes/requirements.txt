@@ -1,0 +1,5 @@
+dotenv
+psycopg
+pgvector
+sentence_transformers
+fastmcp

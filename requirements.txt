@@ -1,0 +1,17 @@
+langchain
+langchain_openai
+pandas
+numpy
+dotenv
+bs4
+sentence_transformers
+hf_xet
+psycopg
+pgvector
+plotly
+scikit-learn
+umap-learn
+nbformat>=4.2.0
+fastmcp
+xgboost
+category_encoders

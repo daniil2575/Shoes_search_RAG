@@ -1,0 +1,78 @@
+services:
+  vector-db:
+    image: pgvector/pgvector:pg16
+    container_name: vector-db
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5430:5432"
+    volumes:
+      - ./database/docker/pg_data:/var/lib/postgresql/data
+    networks:
+      - mcp-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: saveliy.xo@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: test
+    ports:
+      - "81:80"
+    networks:
+      - mcp-network
+    depends_on:
+      - vector-db
+
+  postgres-mcp:
+    image: crystaldba/postgres-mcp
+    container_name: postgres-mcp
+    environment:
+      DATABASE_URI: postgresql://postgres@vector-db:5432/shoes
+    ports:
+      - "8006:8000"
+    command: --access-mode=unrestricted --transport=sse
+    networks:
+      - mcp-network
+    depends_on:
+      - vector-db
+
+  shoes-rag-server:
+    build:
+      context: .
+      dockerfile: mcp/rag_shoes/Dockerfile.shoes-rag
+    container_name: shoes-rag-server
+    ports:
+      - "8007:8000"
+    environment:
+      DATABASE_URI: postgresql://postgres@vector-db:5430/shoes
+    volumes:
+      - ./.env:/.env  # Монтируем .env файл
+      - ./mcp/rag_shoes:/app  # Монтируем папку с кодом
+    working_dir: /app
+    networks:
+      - mcp-network
+    depends_on:
+      - vector-db
+      - postgres-mcp
+
+  sql-generator-server:
+    build:
+      context: .
+      dockerfile: mcp/sql_generator/Dockerfile.sql-generator
+    container_name: sql-generator-server
+    ports:
+      - "8005:8000"
+    volumes:
+      - ./.env:/.env  # Монтируем .env файл
+      - ./mcp/sql_generator:/app  # Монтируем папку с кодом
+    working_dir: /app
+    networks:
+      - mcp-network
+    depends_on:
+      - vector-db
+      - postgres-mcp
+
+networks:
+  mcp-network:
+    driver: bridge
