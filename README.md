@@ -114,4 +114,4 @@ git push -u origin main
 - **psycopg2 errors** — установите клиентские библиотеки PostgreSQL и переустановите зависимости (`pip install -r requirements.txt`).
 
 ## Лицензия
-MIT (при необходимости замените под ваш проект).
+MIT
